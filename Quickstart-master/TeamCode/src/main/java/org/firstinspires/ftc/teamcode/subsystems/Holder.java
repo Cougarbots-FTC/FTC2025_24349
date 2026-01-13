@@ -19,11 +19,12 @@ public class Holder {
         driver2 = mode.gamepad2;
 
         HardwareMap hardwareMap = mode.hardwareMap;
-        holder = hardwareMap.get(CRServo.class, "SpinArm"); //e 2
+        holder = hardwareMap.get(CRServo.class, "littlewheel"); //c0
 
     }
     public void teleOp() {
-
+        handleToggle();
+/*
         if (driver2.y){
             holder.setPower(1);
         }
@@ -32,38 +33,28 @@ public class Holder {
         } else {
             holder.setPower(0);
         }
+
+ */
     }
     private void handleToggle() {
-        // Toggle claw when trigger is pressed
+        // Toggle power for little wheel when y is pressed
         if (driver2.y) {
             if (debounceCounter > DEBOUNCE_THRESHOLD) {
-                handleHolder();
+                toggleOn();
                 debounceCounter = 0;
             }
         } else {
             debounceCounter++;
         }
     }
-    private void handleHolder() {
-        //TODO should turn wheel servo when bumper/other(since we didn't wanna put it on a joystick) is pressed
-        if (driver2.y) {
-            if (debounceCounter > DEBOUNCE_THRESHOLD) {
-                teleOp();
-                debounceCounter = 0;
-            }
-        } else {
-            debounceCounter++;
-        }
-    }
-    /*private void toggleLeft() {
-        if (isUp) {
-            holder.setPosition(0);
-        } else {
-            holder.setPosition(0.5);
-        }
-        isUp = !isUp;
 
-    }*/
+    private void toggleOn() {
+        if (holder.getPower() != 0) {
+            holder.setPower(0);
+        } else {
+            holder.setPower(1);
+        }
+    }
 
     public void addTelemetry(OpMode opMode) {
         opMode.telemetry.addData("Right Stick Y Power: ", driver2.right_stick_y);

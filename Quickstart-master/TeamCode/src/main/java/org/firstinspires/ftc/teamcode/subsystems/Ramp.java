@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-public class Intake {
+public class Ramp {
 
     
 }
