@@ -21,9 +21,11 @@ public class Outtake {
     public void teleOp() {
 
         if (driver2.left_trigger > 0.1) {
-            outtake.setVelocity(-1500);
+            outtake.setPower(-driver2.left_trigger);
+            //outtake.setVelocity(-1500);
         } else {
-            outtake.setVelocity(0);
+            //outtake.setVelocity(0);
+            outtake.setPower(0);
         }
         //outtake.setPower(driver2.left_stick_y);
     }

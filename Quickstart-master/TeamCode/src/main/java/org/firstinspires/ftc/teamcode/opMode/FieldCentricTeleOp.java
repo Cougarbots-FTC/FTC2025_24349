@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.opMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -31,7 +31,7 @@ public class FieldCentricTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        mecanumDrive.mecanumDrive();
+        mecanumDrive.driveFieldRelative();
         delivery.teleOp();
         intake.teleOp();
         outtake.teleOp();

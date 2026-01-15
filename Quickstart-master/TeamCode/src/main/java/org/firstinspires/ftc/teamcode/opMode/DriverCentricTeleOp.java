@@ -35,6 +35,6 @@ public class DriverCentricTeleOp extends OpMode {
         intake.teleOp();
         outtake.teleOp();
         holder.teleOp();
-        mecanumDrive.addTelemetry(this);
+        outtake.addTelemetry(this);
     }
 }

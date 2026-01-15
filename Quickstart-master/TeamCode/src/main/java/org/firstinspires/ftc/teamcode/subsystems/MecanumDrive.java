@@ -2,23 +2,26 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static java.lang.Thread.sleep;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class MecanumDrive {
     private final DcMotorEx front_left, front_right, back_left, back_right;
-
+    private GoBildaPinpointDriver pinpoint;
     private final Gamepad driver1, driver2;
     private final double AUTO_SPEED = -0.75;
 
     private double speed = 1;
 
     public MecanumDrive(OpMode mode) {
-
         driver1 = mode.gamepad1;
         driver2 = mode.gamepad2;
 
@@ -38,21 +41,19 @@ public class MecanumDrive {
         front_left.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         front_right.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-    }
-    /*
-    public void MecanumDriveStraff(OpMode mode){
-        driver1 = mode.gamepad1;
-        driver2 = mode.gamepad2;
 
-        HardwareMap hardwareMap = mode.hardwareMap;
-        front_left = hardwareMap.get(DcMotorEx.class, "FrontLeft"); //2
-        front_right = hardwareMap.get(DcMotorEx.class, "FrontRight"); //0
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        //Configure the pinpoint computer
+        pinpoint.setOffsets(2.125, 4.125, DistanceUnit.INCH);
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-        //this should fix our straffing problem, bc it would work for usual driving but not for straffing:
-        front_right.setDirection(DcMotorEx.Direction.REVERSE);
-        front_left.setDirection(DcMotorEx.Direction.REVERSE);
+        //Set the pinpoint starting position
+        pinpoint.resetPosAndIMU();
+        //Pose2D startingPos = new Pose2D(DistanceUnit.INCH, 2, 3, AngleUnit.RADIANS, 0);
+        pinpoint.setHeading(0, AngleUnit.RADIANS);
     }
-*/
+
     public void mecanumDrive() {
 
         if (driver1.right_bumper) {
@@ -80,23 +81,33 @@ public class MecanumDrive {
         back_right.setPower(rightBackPower);
     }
 
-    /*private void driveFieldRelative(double forward, double right, double rotate) {
-        // First, convert direction being asked to drive to polar coordinates
-        double theta = Math.atan2(forward, right);
-        double r = Math.hypot(right, forward);
+    public void driveFieldRelative() {
+        pinpoint.update();
+        double y = -driver1.left_stick_y; // Remember to invert
+        double x = driver1.left_stick_x;
+        double rx = driver1.right_stick_x;
 
-        // Second, rotate angle by the angle the robot is pointing
-        theta = AngleUnit.normalizeRadians(theta -
-                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        // Get current heading from Pinpoint in Radians
+        double botHeading = pinpoint.getHeading(AngleUnit.RADIANS);
+        Pose2D pos = pinpoint.getPosition();
 
-        // Third, convert back to cartesian
-        double newForward = r * Math.sin(theta);
-        double newRight = r * Math.cos(theta);
+        // Field-centric kinematic transformation
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        // Finally, call the drive method with robot relative forward and right amounts
-        drive(newForward, newRight, rotate);
+        // Denominator is the largest motor power
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+
+        front_left.setPower(frontLeftPower);
+        back_left.setPower(backLeftPower);
+        front_right.setPower(frontRightPower);
+        back_right.setPower(backRightPower);
     }
-*/
+
 
     // Thanks to FTC16072 for sharing this code!!
     public void Auto(int time) {
@@ -125,6 +136,11 @@ public class MecanumDrive {
         opMode.telemetry.addData("Right Back: ", back_right.getCurrent(CurrentUnit.AMPS));
         opMode.telemetry.addData("Left Front: ", front_left.getCurrent(CurrentUnit.AMPS));
         opMode.telemetry.addData("Right Front: ", front_left.getCurrent(CurrentUnit.AMPS));
+
+        //pinpoint.getPosition();
+        //opMode.telemetry.addData("Robot Position X: ", pinpoint.getPosX());
+        //opMode.telemetry.addData("Robot Position Y: ", pinpoint.getPosY());
+
 
         opMode.telemetry.update();
     }
