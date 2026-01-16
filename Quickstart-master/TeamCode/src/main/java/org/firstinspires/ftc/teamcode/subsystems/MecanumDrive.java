@@ -43,7 +43,7 @@ public class MecanumDrive {
 
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        //Configure the pinpoint computer
+        //Configure the pinpoint computer TODO fix these measuremenets
         pinpoint.setOffsets(2.125, 4.125, DistanceUnit.INCH);
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);

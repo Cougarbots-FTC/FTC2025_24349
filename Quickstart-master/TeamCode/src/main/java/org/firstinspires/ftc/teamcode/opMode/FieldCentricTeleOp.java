@@ -20,13 +20,11 @@ public class FieldCentricTeleOp extends OpMode {
 
     @Override
     public void init() {
-        //intake = new Intake(this);
         delivery = new Delivery(this);
         outtake = new Outtake(this);
         mecanumDrive = new MecanumDrive(this);
         holder = new Holder(this);
         intake = new Intake24349(this);
-
     }
 
     @Override

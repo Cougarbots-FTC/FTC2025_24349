@@ -47,7 +47,7 @@ public class Outtake {
     }
 
     public void addTelemetry(OpMode opMode) {
-        opMode.telemetry.addData("Left Stick Y Power: ", outtake.getVelocity());
+        opMode.telemetry.addData("Outtake Velocity: ", outtake.getVelocity());
         opMode.telemetry.addData("Shooting from the SMALL launch zone? -->", shootFromBack);
         opMode.telemetry.update();
     }

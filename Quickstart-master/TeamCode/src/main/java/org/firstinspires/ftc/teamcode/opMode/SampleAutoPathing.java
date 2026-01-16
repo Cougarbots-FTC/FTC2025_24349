@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.opMode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 
 @Autonomous(name = "Pedro Auto Test")
 
@@ -50,7 +53,7 @@ public class SampleAutoPathing extends OpMode {
                 break;
             case SHOOT_PRELOAD:
                 //check is the follower done
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
                     follower.followPath(driveShootPosEndPos, true);
                     setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                     //TODO add logic for flywheel shooter
@@ -61,7 +64,7 @@ public class SampleAutoPathing extends OpMode {
                 if (!follower.isBusy()) {
                     telemetry.addLine("All paths done");
                 }
-
+                break;
             default:
                 telemetry.addLine("No State Commanded");
                 break;
@@ -72,13 +75,33 @@ public class SampleAutoPathing extends OpMode {
         pathState = newState;
         pathTimer.resetTimer();
     }
+    @Override
     public void init() {
+        follower = Constants.createFollower(hardwareMap);
 
+        follower.setPose(startPos);
+
+        pathTimer = new Timer();
+        opModeTimer = new Timer();
+
+        buildPath();
+
+        pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
     }
+
+    @Override
+    public void start() {
+        pathTimer.resetTimer();
+        opModeTimer.resetTimer();
+    }
+
 
     public void loop() {
         follower.update();
+        startPathUpdate();
 
+        telemetry.addData("Pose", follower.getPose());
+        telemetry.update();
 
     }
 }
