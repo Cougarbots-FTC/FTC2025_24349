@@ -17,7 +17,7 @@ public class StartFrontAuto extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        mecanumDrive.Auto(700);
+        mecanumDrive.move(700,1);
 
         while (opModeIsActive()){// && (runtime.seconds() < 10.0)) {
             telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());

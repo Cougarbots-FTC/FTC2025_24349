@@ -19,6 +19,10 @@ public class Intake24349 {
 
     }
 
+    public void turnOnIntake(double power) {
+        intake.setPower(power);
+    }
+
     public void teleOp() {
 
         intake.setPower(driver2.right_stick_y);

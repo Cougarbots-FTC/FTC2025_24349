@@ -27,6 +27,9 @@ public class Delivery {
             delivery.setPower(0);
         }
     }
+    public void turnOnDelivery(double power) {
+        delivery.setPower(power);
+    }
     public void addTelemetry(OpMode opMode) {
         opMode.telemetry.addData("Right Stick Y Power: ", driver2.right_stick_y);
         opMode.telemetry.update();

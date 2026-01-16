@@ -110,25 +110,77 @@ public class MecanumDrive {
 
 
     // Thanks to FTC16072 for sharing this code!!
-    public void Auto(int time) {
+    public void move(int time, double power) {
 
-        front_left.setPower(AUTO_SPEED);
-        front_right.setPower(AUTO_SPEED);
-        back_left.setPower(AUTO_SPEED);
-        back_right.setPower(AUTO_SPEED);
+        setAllMotors(power);
 
         try {
             sleep(time);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        front_left.setPower(0);
-        //.setVelocity() or .setSpeed()
-        front_right.setPower(0);
-        back_left.setPower(0);
-        back_right.setPower(0);
 
+        setAllMotors(0);
 
+    }
+    public void moveLeft(double p, int t){
+        front_left.setPower(p);
+        front_right.setPower(-p);
+        back_left.setPower(-p);
+        back_right.setPower(p);
+        try {
+            sleep(t);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        setAllMotors(0);
+    }
+
+    public void moveRight(double p, int t){
+        front_left.setPower(-p);
+        front_right.setPower(p);
+        back_left.setPower(p);
+        back_right.setPower(-p);
+        try {
+            sleep(t);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        setAllMotors(0);
+    }
+    public void turnRight(int t, double p){
+        front_left.setPower(-p);
+        front_right.setPower(-p);
+        back_left.setPower(p);
+        back_right.setPower(p);
+        try {
+            sleep(t);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        setAllMotors(0);
+    }
+    public void turnLeft(int t, double p) {
+        front_left.setPower(-p);
+        front_right.setPower(p);
+        back_left.setPower(-p);
+        back_right.setPower(p);
+        try {
+            sleep(t);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        setAllMotors(0);
+    }
+    public void setAllMotors(double power) {
+        front_left.setPower(power);
+        front_right.setPower(power);
+        back_left.setPower(power);
+        back_right.setPower(power);
     }
 
     public void addTelemetry(OpMode opMode) {

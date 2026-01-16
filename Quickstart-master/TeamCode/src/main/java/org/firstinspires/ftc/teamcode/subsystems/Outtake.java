@@ -46,6 +46,10 @@ public class Outtake {
         //outtake.setPower(driver2.left_stick_y);
     }
 
+    public void turnOnOuttake(int velocity) {
+        outtake.setVelocity(velocity);
+    }
+
     public void addTelemetry(OpMode opMode) {
         opMode.telemetry.addData("Outtake Velocity: ", outtake.getVelocity());
         opMode.telemetry.addData("Shooting from the SMALL launch zone? -->", shootFromBack);
