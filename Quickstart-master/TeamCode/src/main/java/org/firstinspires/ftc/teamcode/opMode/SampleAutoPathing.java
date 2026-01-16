@@ -77,6 +77,8 @@ public class SampleAutoPathing extends OpMode {
     }
 
     public void loop() {
+        follower.update();
+
 
     }
 }
