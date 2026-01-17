@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake24349;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
-@Autonomous(name = "Auto By Time From Back")
-public class AutoByTime extends OpMode {
+@Autonomous(name = "Auto By Time From Back BLUE ALLIANCE")
+public class AutoByTimeBLUE extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private MecanumDrive mecanumDrive;
@@ -29,6 +29,8 @@ public class AutoByTime extends OpMode {
 
     }
     public void start() {
+        //blue
+
         mecanumDrive.move(200, -0.5);
         mecanumDrive.turnLeft(250, -0.65);
         mecanumDrive.move(150, -0.5);
@@ -39,6 +41,9 @@ public class AutoByTime extends OpMode {
         sleep(5000);
         intake.turnOnIntake(1);
         sleep(5000);
+        //theoretical auto from day of comp 9 am
+        mecanumDrive.turnRight(300,-0.65);//<-- this to get out of launch zone
+        mecanumDrive.move(400,-0.9); //<-- get partially into base zone
         
         outtake.turnOnOuttake(0);
         delivery.turnOnDelivery(0);
