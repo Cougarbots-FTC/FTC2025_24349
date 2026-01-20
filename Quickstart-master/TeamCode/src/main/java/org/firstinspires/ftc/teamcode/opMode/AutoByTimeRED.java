@@ -32,7 +32,7 @@ public class AutoByTimeRED extends OpMode {
         //red!!!!
 
         mecanumDrive.move(200, -0.5);
-        mecanumDrive.turnRight(300, -0.65); // little more bc of our weird outtake angle
+        mecanumDrive.turnRight(100, -0.65); // little more bc of our weird outtake angle
         //using negative power in hopes it works like turnLeft
         mecanumDrive.move(150, -0.5);
 

@@ -151,10 +151,10 @@ public class MecanumDrive {
         setAllMotors(0);
     }
     public void turnRight(int t, double p){
-        front_left.setPower(-p);
+        front_left.setPower(p);
         front_right.setPower(-p);
         back_left.setPower(p);
-        back_right.setPower(p);
+        back_right.setPower(-p);
         try {
             sleep(t);
         } catch (InterruptedException e) {
