@@ -119,7 +119,7 @@ public class MecanumDrive {
 
     public void setHeadingToLaunch() {
         if (driver1.b) {
-            //pinpoint.setHeading(30, AngleUnit.DEGREES);
+            //pinpoint.setHeading(31.7, AngleUnit.DEGREES);
         }
     }
 
