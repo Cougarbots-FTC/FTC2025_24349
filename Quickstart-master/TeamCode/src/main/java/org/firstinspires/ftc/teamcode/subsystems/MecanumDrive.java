@@ -44,7 +44,7 @@ public class MecanumDrive {
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         //Configure the pinpoint computer TODO fix these measuremenets
-        pinpoint.setOffsets(2.125, 4.125, DistanceUnit.INCH);
+        pinpoint.setOffsets(0.125, -0.125, DistanceUnit.INCH);
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
@@ -106,6 +106,21 @@ public class MecanumDrive {
         back_left.setPower(backLeftPower);
         front_right.setPower(frontRightPower);
         back_right.setPower(backRightPower);
+
+        resetHeading();
+        setHeadingToLaunch();
+    }
+
+    public void resetHeading() {
+        if (driver1.a) {
+            pinpoint.resetPosAndIMU();
+        }
+    }
+
+    public void setHeadingToLaunch() {
+        if (driver1.b) {
+            //pinpoint.setHeading(30, AngleUnit.DEGREES);
+        }
     }
 
 
@@ -184,14 +199,15 @@ public class MecanumDrive {
     }
 
     public void addTelemetry(OpMode opMode) {
-        opMode.telemetry.addData("Left Back: ", back_left.getCurrent(CurrentUnit.AMPS));
-        opMode.telemetry.addData("Right Back: ", back_right.getCurrent(CurrentUnit.AMPS));
-        opMode.telemetry.addData("Left Front: ", front_left.getCurrent(CurrentUnit.AMPS));
-        opMode.telemetry.addData("Right Front: ", front_left.getCurrent(CurrentUnit.AMPS));
+        //opMode.telemetry.addData("Left Back: ", back_left.getCurrent(CurrentUnit.AMPS));
+        //opMode.telemetry.addData("Right Back: ", back_right.getCurrent(CurrentUnit.AMPS));
+        //opMode.telemetry.addData("Left Front: ", front_left.getCurrent(CurrentUnit.AMPS));
+        //opMode.telemetry.addData("Right Front: ", front_left.getCurrent(CurrentUnit.AMPS));
 
-        //pinpoint.getPosition();
-        //opMode.telemetry.addData("Robot Position X: ", pinpoint.getPosX());
-        //opMode.telemetry.addData("Robot Position Y: ", pinpoint.getPosY());
+        pinpoint.getPosition();
+        opMode.telemetry.addData("Robot Position X: ", pinpoint.getPosX(DistanceUnit.INCH));
+        opMode.telemetry.addData("Robot Position Y: ", pinpoint.getPosY(DistanceUnit.INCH));
+        opMode.telemetry.addData("Robot Heading: ", pinpoint.getHeading(AngleUnit.DEGREES));
 
 
         opMode.telemetry.update();

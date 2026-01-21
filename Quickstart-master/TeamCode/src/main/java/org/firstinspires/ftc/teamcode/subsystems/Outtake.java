@@ -22,22 +22,22 @@ public class Outtake {
     }
     public void teleOp() {
 
-        if(driver2.a) {
+        /*if(driver2.a) {
             shootFromBack = true;
 
         }
         if(driver2.b){
             shootFromBack = false;
         }
-
+*/
         if (driver2.left_trigger > 0.1) {
             //outtake.setPower(-driver2.left_trigger);
-            if(shootFromBack) {
+            //if(shootFromBack) {
                 outtake.setVelocity(-1900);
 
-            }else{
+            /*}else{
                 outtake.setVelocity(-1500);
-            }
+            }*/
 
         } else {
             outtake.setVelocity(0);

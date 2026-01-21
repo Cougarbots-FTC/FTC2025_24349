@@ -39,6 +39,6 @@ public class FieldCentricTeleOp extends OpMode {
         outtake.teleOp();
         holder.teleOp();
         intakeServo.teleOp();
-        outtake.addTelemetry(this);
+        mecanumDrive.addTelemetry(this);
     }
 }
