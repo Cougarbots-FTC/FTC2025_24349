@@ -16,6 +16,7 @@ public class DriverCentricTeleOp extends OpMode {
     private Intake24349 intake;
     private MecanumDrive mecanumDrive;
     private Holder holder;
+    private IntakeServo intakeServo;
 
     @Override
     public void init() {
@@ -25,6 +26,7 @@ public class DriverCentricTeleOp extends OpMode {
         mecanumDrive = new MecanumDrive(this);
         holder = new Holder(this);
         intake = new Intake24349(this);
+        intakeServo = new IntakeServo(this);
 
     }
 
@@ -35,6 +37,7 @@ public class DriverCentricTeleOp extends OpMode {
         intake.teleOp();
         outtake.teleOp();
         holder.teleOp();
-        outtake.addTelemetry(this);
+        intakeServo.addTelemetry(this);
+        intakeServo.teleOp();
     }
 }

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Delivery;
 import org.firstinspires.ftc.teamcode.subsystems.Holder;
 import org.firstinspires.ftc.teamcode.subsystems.Intake24349;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeServo;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
@@ -17,6 +18,7 @@ public class FieldCentricTeleOp extends OpMode {
     private Intake24349 intake;
     private MecanumDrive mecanumDrive;
     private Holder holder;
+    private IntakeServo intakeServo;
 
     @Override
     public void init() {
@@ -25,6 +27,8 @@ public class FieldCentricTeleOp extends OpMode {
         mecanumDrive = new MecanumDrive(this);
         holder = new Holder(this);
         intake = new Intake24349(this);
+        intakeServo = new IntakeServo(this);
+
     }
 
     @Override
@@ -34,6 +38,7 @@ public class FieldCentricTeleOp extends OpMode {
         intake.teleOp();
         outtake.teleOp();
         holder.teleOp();
+        intakeServo.teleOp();
         outtake.addTelemetry(this);
     }
 }

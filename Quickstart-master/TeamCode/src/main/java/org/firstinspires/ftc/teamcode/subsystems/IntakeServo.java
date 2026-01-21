@@ -17,7 +17,7 @@ public class IntakeServo {
         driver2 = mode.gamepad2;
 
         HardwareMap hardwareMap = mode.hardwareMap;
-        holder = hardwareMap.get(CRServo.class, "littlewheel"); //c0
+        holder = hardwareMap.get(CRServo.class, "intakeServo"); //c0
 
     }
     public void teleOp() {
@@ -31,8 +31,8 @@ public class IntakeServo {
         } else {
             holder.setPower(0);
         }
+*/
 
- */
     }
     private void handleToggle() {
         // Toggle power for little wheel when y is pressed
@@ -50,7 +50,7 @@ public class IntakeServo {
         if (holder.getPower() != 0) {
             holder.setPower(0);
         } else {
-            holder.setPower(1);
+            holder.setPower(-1);
         }
     }
 
