@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opMode;
 
+import static android.os.SystemClock.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.BezierLine;
@@ -9,6 +11,9 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Delivery;
+import org.firstinspires.ftc.teamcode.subsystems.Intake24349;
+import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 
 @Autonomous(name = "Pedro Auto Test")
@@ -16,23 +21,28 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class SampleAutoPathing extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
+    private Outtake outtake;
+    private Intake24349 intake;
+    private Delivery delivery;
 
     public enum PathState {
-        //START POSITION_END POSITION
-        //DRIVE > MOVEMENT STATE
-        // SHOOT > ATTEMPT
         DRIVE_STARTPOS_SHOOT_POS,
-
-        SHOOT_PRELOAD,
-        DRIVE_SHOOTPOS_ENDPOS
+        SHOOT,
+        DRIVE_SHOOT_FIRSTSPIKE,
+        DRIVE_FIRSTSPIKE_COLLECT,
+        DRIVE_COLLECT_SHOOTPOS,
+        DRIVE_SHOOTPOS_ENDPOS,
+        DONE
     }
     PathState pathState;
 
-    private final Pose startPos = new Pose(63.65731166912851, 8.212703101920235, Math.toRadians(90));
-    private final Pose shootPosition = new Pose(67.91137370753323,19.834564254062023, Math.toRadians(113));
-    private final Pose endPose = new Pose(62.85819793205318, 36.87592319054652, Math.toRadians(113));
+    private final Pose startPos = new Pose(56, 8, Math.toRadians(90));
+    private final Pose shootPosition = new Pose(60,9, Math.toRadians(113));
+    private final Pose firstSpike = new Pose(40.331314623338265, 31, Math.toRadians(0));
+    private final Pose collectFirstSpike = new Pose(17, 31);
+    private final Pose endPose = new Pose(60, 35, Math.toRadians(113));
 
-    private PathChain driveStartPosShootPos, driveShootPosEndPos;
+    private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike, driveFirstSpikeCollect, driveCollectShoot;
 
     public void buildPath() {
         driveStartPosShootPos = follower.pathBuilder()
@@ -43,28 +53,83 @@ public class SampleAutoPathing extends OpMode {
                 .addPath(new BezierLine(shootPosition, endPose))
                 .setLinearHeadingInterpolation(shootPosition.getHeading(), endPose.getHeading())
                 .build();
+
+        driveShootFirstSpike = follower.pathBuilder()
+                .addPath(new BezierLine(shootPosition, firstSpike))
+                .setLinearHeadingInterpolation(shootPosition.getHeading(), firstSpike.getHeading())
+                .build();
+
+        driveFirstSpikeCollect = follower.pathBuilder()
+                .addPath(new BezierLine(firstSpike, collectFirstSpike))
+                .setLinearHeadingInterpolation(firstSpike.getHeading(), collectFirstSpike.getHeading())
+                .build();
+
+        driveCollectShoot = follower.pathBuilder()
+                .addPath(new BezierLine(collectFirstSpike, shootPosition))
+                .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), shootPosition.getHeading())
+                .build();
     }
 
     public void startPathUpdate() {
         switch (pathState) {
             case DRIVE_STARTPOS_SHOOT_POS:
                 follower.followPath(driveStartPosShootPos, true);
-                setPathState(PathState.SHOOT_PRELOAD); //reset the timer and make a new state
+                setPathState(PathState.SHOOT); //reset the timer and make a new state
                 break;
-            case SHOOT_PRELOAD:
+            case DRIVE_SHOOT_FIRSTSPIKE:
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    follower.followPath(driveShootFirstSpike, true);
+                    setPathState(PathState.DRIVE_FIRSTSPIKE_COLLECT);
+                    intake.turnOnIntake(1); //maybe move if it doesn't turn on soon enough
+                }
+                break;
+            case DRIVE_FIRSTSPIKE_COLLECT:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
+                    follower.setMaxPower(0.4);
+                    follower.followPath(driveFirstSpikeCollect, true);
+                    setPathState(PathState.DRIVE_COLLECT_SHOOTPOS);
+                }
+                break;
+            case DRIVE_COLLECT_SHOOTPOS:
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    intake.turnOnIntake(0);
+                    follower.followPath(driveCollectShoot, true);
+                    setPathState(PathState.SHOOT);
+                }
+                break;
+            case SHOOT:
                 //check is the follower done
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
-                    follower.followPath(driveShootPosEndPos, true);
-                    setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
+                    setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
                     //TODO add logic for flywheel shooter
+                    outtake.turnOnOuttake(-1880);
+                    sleep(5000);
+                    delivery.turnOnDelivery(-1);
+                    sleep(5000);
+                    intake.turnOnIntake(1);
+                    sleep(6000);
                     telemetry.addLine("Done Path 1");
+
+                    delivery.turnOnDelivery(0);
+                    intake.turnOnIntake(0);
+                    outtake.turnOnOuttake(0);
+
                 }
                 break;
             case DRIVE_SHOOTPOS_ENDPOS:
                 if (!follower.isBusy()) {
-                    telemetry.addLine("All paths done");
+                    follower.followPath(driveShootPosEndPos, true);
+                    setPathState(PathState.DONE);
+                    delivery.turnOnDelivery(0);
+                    outtake.turnOnOuttake(0);
+                    intake.turnOnIntake(0);
+
                 }
                 break;
+            case DONE:
+                if (!follower.isBusy()) {
+                    telemetry.addLine("All paths done");
+                }
             default:
                 telemetry.addLine("No State Commanded");
                 break;
@@ -80,6 +145,10 @@ public class SampleAutoPathing extends OpMode {
         follower = Constants.createFollower(hardwareMap);
 
         follower.setPose(startPos);
+
+        outtake = new Outtake(this);
+        intake = new Intake24349(this);
+        delivery = new Delivery(this);
 
         pathTimer = new Timer();
         opModeTimer = new Timer();
