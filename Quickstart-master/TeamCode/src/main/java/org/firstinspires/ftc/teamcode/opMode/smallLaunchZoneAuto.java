@@ -1,6 +1,10 @@
-package org.firstinspires.ftc.teamcode.opModes;
+package org.firstinspires.ftc.teamcode.opMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+
+package org.firstinspires.ftc.teamcode.opModes;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -27,3 +31,4 @@ public class StartFrontAuto extends LinearOpMode {
 
     }
 }
+

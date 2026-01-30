@@ -5,6 +5,9 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
+/*
+this auto cannot be used until we have 2 working Pinpoint dead wheels
+ */
 public class StartGoalAutoPedroPath {
 
     public static class Paths {

@@ -24,30 +24,24 @@ public class MecanumDrive {
     public MecanumDrive(OpMode mode) {
         driver1 = mode.gamepad1;
         driver2 = mode.gamepad2;
-
         HardwareMap hardwareMap = mode.hardwareMap;
         front_left = hardwareMap.get(DcMotorEx.class, "FrontLeft"); //2
         front_right = hardwareMap.get(DcMotorEx.class, "FrontRight"); //0
         back_left = hardwareMap.get(DcMotorEx.class, "BackLeft"); //1
         back_right = hardwareMap.get(DcMotorEx.class, "BackRight"); //3
-
         //this will make drivetrain used correctly
         back_left.setDirection(DcMotorEx.Direction.REVERSE);
-        //front_right.setDirection(DcMotorEx.Direction.REVERSE);
-        //back_right.setDirection(DcMotorEx.Direction.REVERSE);
 
         back_left.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         back_right.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         front_left.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         front_right.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
-
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         //Configure the pinpoint computer
         pinpoint.setOffsets(2.125, 4.125, DistanceUnit.INCH);
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
-
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.REVERSED);
         //Set the pinpoint starting position
         pinpoint.resetPosAndIMU();
         //Pose2D startingPos = new Pose2D(DistanceUnit.INCH, 2, 3, AngleUnit.RADIANS, 0);
@@ -68,7 +62,8 @@ public class MecanumDrive {
         double pivot = driver1.right_stick_x;
 
         //Obtains values for each motor through the positions through values
-        //from  left joystick which has up/down(vertical) and left/right values(horizontal), and right joystick which has left/right values(pivot)
+        //from  left joystick which has up/down(vertical) and left/right values(horizontal),
+        // and right joystick which has left/right values(pivot)
         double denominator = Math.max(Math.abs(vertical) + Math.abs(horizontal) + Math.abs(pivot), 1);
         double rightFrontPower = (vertical + horizontal + pivot) / denominator * speed;
         double rightBackPower = (vertical - horizontal + pivot) / denominator * speed;
