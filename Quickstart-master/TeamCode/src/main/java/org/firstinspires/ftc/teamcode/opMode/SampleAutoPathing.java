@@ -38,7 +38,7 @@ public class SampleAutoPathing extends OpMode {
 
     private final Pose startPos = new Pose(56, 8, Math.toRadians(90));
     private final Pose shootPosition = new Pose(60,9, Math.toRadians(113));
-    private final Pose firstSpike = new Pose(40.331314623338265, 31, Math.toRadians(0));
+    private final Pose firstSpike = new Pose(40.3, 31, Math.toRadians(0));
     private final Pose collectFirstSpike = new Pose(17, 31);
     private final Pose endPose = new Pose(60, 35, Math.toRadians(113));
 
