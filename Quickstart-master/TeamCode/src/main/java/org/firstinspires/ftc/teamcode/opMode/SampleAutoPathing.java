@@ -4,6 +4,7 @@ import static android.os.SystemClock.sleep;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -16,7 +17,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake24349;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 
-@Autonomous(name = "Pedro Auto Test")
+@Autonomous(name = "Blue Auto")
 
 public class SampleAutoPathing extends OpMode {
     private Follower follower;
@@ -24,6 +25,7 @@ public class SampleAutoPathing extends OpMode {
     private Outtake outtake;
     private Intake24349 intake;
     private Delivery delivery;
+    private int shootCount;
 
     public enum PathState {
         DRIVE_STARTPOS_SHOOT_POS,
@@ -36,11 +38,11 @@ public class SampleAutoPathing extends OpMode {
     }
     PathState pathState;
 
-    private final Pose startPos = new Pose(56, 8, Math.toRadians(90));
-    private final Pose shootPosition = new Pose(60,9, Math.toRadians(113));
-    private final Pose firstSpike = new Pose(40.3, 31, Math.toRadians(0));
+    private final Pose startPos = new Pose(56, 8.4, Math.toRadians(90));
+    private final Pose shootPosition = new Pose(59,12, Math.toRadians(114));//robot heading
+    private final Pose firstSpike = new Pose(55, 31, Math.toRadians(0));
     private final Pose collectFirstSpike = new Pose(17, 31);
-    private final Pose endPose = new Pose(60, 35, Math.toRadians(113));
+    private final Pose endPose = new Pose(30, 12, Math.toRadians(180));
 
     private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike, driveFirstSpikeCollect, driveCollectShoot;
 
@@ -65,7 +67,7 @@ public class SampleAutoPathing extends OpMode {
                 .build();
 
         driveCollectShoot = follower.pathBuilder()
-                .addPath(new BezierLine(collectFirstSpike, shootPosition))
+                .addPath(new BezierCurve(collectFirstSpike, shootPosition))
                 .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), shootPosition.getHeading())
                 .build();
     }
@@ -77,21 +79,22 @@ public class SampleAutoPathing extends OpMode {
                 setPathState(PathState.SHOOT); //reset the timer and make a new state
                 break;
             case DRIVE_SHOOT_FIRSTSPIKE:
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 0.5) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
                     follower.followPath(driveShootFirstSpike, true);
                     setPathState(PathState.DRIVE_FIRSTSPIKE_COLLECT);
                     intake.turnOnIntake(1); //maybe move if it doesn't turn on soon enough
                 }
                 break;
             case DRIVE_FIRSTSPIKE_COLLECT:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
                     follower.setMaxPower(0.4);
                     follower.followPath(driveFirstSpikeCollect, true);
                     setPathState(PathState.DRIVE_COLLECT_SHOOTPOS);
                 }
                 break;
             case DRIVE_COLLECT_SHOOTPOS:
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 0.5) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
+                    follower.setMaxPower(1);
                     intake.turnOnIntake(0);
                     follower.followPath(driveCollectShoot, true);
                     setPathState(PathState.SHOOT);
@@ -99,15 +102,20 @@ public class SampleAutoPathing extends OpMode {
                 break;
             case SHOOT:
                 //check is the follower done
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
-                    setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
+                    shootCount++;
+                    outtake.turnOnOuttake(-1735);
+                    if (shootCount == 2) {
+                        setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
+                    } else {
+                        setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
+                    }
                     //TODO add logic for flywheel shooter
-                    outtake.turnOnOuttake(-1880);
-                    sleep(5000);
+                    sleep(4000);//4500
                     delivery.turnOnDelivery(-1);
-                    sleep(5000);
+                    sleep(2500);//3000
                     intake.turnOnIntake(1);
-                    sleep(6000);
+                    sleep(3000);
                     telemetry.addLine("Done Path 1");
 
                     delivery.turnOnDelivery(0);
@@ -156,6 +164,8 @@ public class SampleAutoPathing extends OpMode {
         buildPath();
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
+
+        shootCount = 0;
     }
 
     @Override
