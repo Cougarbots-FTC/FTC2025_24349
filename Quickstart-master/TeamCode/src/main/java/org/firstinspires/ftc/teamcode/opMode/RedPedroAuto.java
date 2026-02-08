@@ -40,9 +40,9 @@ public class RedPedroAuto extends OpMode {
 
     private final Pose startPos = new Pose(84.3, 8.4, Math.toRadians(90));
     private final Pose shootPosition = new Pose(86.8,14.89, Math.toRadians(65));//robot heading
-    private final Pose firstSpike = new Pose(96, 38.3, Math.toRadians(90));
-    private final Pose collectFirstSpike = new Pose(131, 38.3);
-    private final Pose endPose = new Pose(114, 10, Math.toRadians(0));
+    private final Pose firstSpike = new Pose(96.090, 36.5, Math.toRadians(180)); //new Pose(96, 38.3, Math.toRadians(90));
+    private final Pose collectFirstSpike = new Pose(131.396, 36.5); //new Pose(131, 38.3);
+    private final Pose endPose = new Pose(90, 30, Math.toRadians(65));
 
     private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike, driveFirstSpikeCollect, driveCollectShoot;
 
@@ -63,7 +63,8 @@ public class RedPedroAuto extends OpMode {
 
         driveFirstSpikeCollect = follower.pathBuilder()
                 .addPath(new BezierLine(firstSpike, collectFirstSpike))
-                .setLinearHeadingInterpolation(firstSpike.getHeading(), collectFirstSpike.getHeading())
+                .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         driveCollectShoot = follower.pathBuilder()
@@ -94,7 +95,7 @@ public class RedPedroAuto extends OpMode {
                 break;
             case DRIVE_COLLECT_SHOOTPOS:
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.7);
                     intake.turnOnIntake(0);
                     follower.followPath(driveCollectShoot, true);
                     setPathState(PathState.SHOOT);
@@ -104,7 +105,7 @@ public class RedPedroAuto extends OpMode {
                 //check is the follower done
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
                     shootCount++;
-                    outtake.turnOnOuttake(-1735);
+                    outtake.turnOnOuttake(-1740);
                     if (shootCount == 2) {
                         setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                     } else {

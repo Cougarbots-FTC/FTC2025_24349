@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.opMode;
 import static android.os.SystemClock.sleep;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -19,7 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 @Autonomous(name = "Blue Auto")
 
-public class SampleAutoPathing extends OpMode {
+public class BluePedroAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
     private Outtake outtake;
@@ -42,7 +41,7 @@ public class SampleAutoPathing extends OpMode {
     private final Pose shootPosition = new Pose(59,12, Math.toRadians(114));//robot heading
     private final Pose firstSpike = new Pose(55, 31, Math.toRadians(0));
     private final Pose collectFirstSpike = new Pose(17, 31);
-    private final Pose endPose = new Pose(30, 12, Math.toRadians(180));
+    private final Pose endPose = new Pose(53.5, 27.7, Math.toRadians(114));
 
     private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike, driveFirstSpikeCollect, driveCollectShoot;
 
