@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Delivery;
 import org.firstinspires.ftc.teamcode.subsystems.Intake24349;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.subsystems.PIDOuttake;
 
 
 @Autonomous(name = "Red Auto")
@@ -22,7 +23,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 public class RedPedroAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
-    private Outtake outtake;
+    private PIDOuttake outtake;
     private Intake24349 intake;
     private Delivery delivery;
     private int shootCount;
@@ -34,17 +35,26 @@ public class RedPedroAuto extends OpMode {
         DRIVE_FIRSTSPIKE_COLLECT,
         DRIVE_COLLECT_SHOOTPOS,
         DRIVE_SHOOTPOS_ENDPOS,
+        DRIVE_SECONDSPIKE,
+        DRIVE_COLLECT_SECOND_SPIKE,
+        DRIVE_SHOOT_SECOND_SPIKE,
         DONE
     }
     PathState pathState;
 
-    private final Pose startPos = new Pose(84.3, 8.4, Math.toRadians(90));
-    private final Pose shootPosition = new Pose(86.8,14.89, Math.toRadians(65));//robot heading
+    private final Pose startPos = new Pose(83.6, 9.4, Math.toRadians(90));
+    private final Pose shootPosition = new Pose(86.8,14.5, Math.toRadians(65));//robot heading
+    private final Pose secondShootPosition = new Pose(86.9,14.65, Math.toRadians(64));//NEW
+
     private final Pose firstSpike = new Pose(96.090, 36.5, Math.toRadians(180)); //new Pose(96, 38.3, Math.toRadians(90));
-    private final Pose collectFirstSpike = new Pose(131.396, 36.5); //new Pose(131, 38.3);
+    private final Pose secondSpike = new Pose(96.090, 59, Math.toRadians(180)); //new Pose(96, 38.3, Math.toRadians(90)); NEW
+    private final Pose collectFirstSpike = new Pose(132, 36.5); //new Pose(131, 38.3);
+    private final Pose collectSecondSpike = new Pose(129, 59); //new Pose(131, 38.3); NEW
     private final Pose endPose = new Pose(90, 30, Math.toRadians(65));
 
-    private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike, driveFirstSpikeCollect, driveCollectShoot;
+    private PathChain driveStartPosShootPos, driveShootPosEndPos, driveShootFirstSpike,
+            driveFirstSpikeCollect, driveSecondSpikeCollect, driveCollectSecondSpike,
+            driveShootSecondSpike, driveCollectShoot;
 
     public void buildPath() {
         driveStartPosShootPos = follower.pathBuilder()
@@ -68,8 +78,25 @@ public class RedPedroAuto extends OpMode {
                 .build();
 
         driveCollectShoot = follower.pathBuilder()
-                .addPath(new BezierCurve(collectFirstSpike, shootPosition))
-                .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), shootPosition.getHeading())
+                .addPath(new BezierCurve(collectFirstSpike, secondShootPosition)) //add second
+                .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), endPose.getHeading())
+                .build();
+
+
+        //SECOND SPIKE
+        driveSecondSpikeCollect = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPosition, secondSpike))
+                .setLinearHeadingInterpolation(shootPosition.getHeading(), secondSpike.getHeading())
+                .build();
+
+        driveCollectSecondSpike = follower.pathBuilder()
+                .addPath(new BezierCurve(secondSpike, collectSecondSpike))
+                .setTangentHeadingInterpolation()
+                .setReversed()
+                .build();
+        driveShootSecondSpike = follower.pathBuilder()
+                .addPath(new BezierCurve(collectSecondSpike, secondShootPosition))
+                .setLinearHeadingInterpolation(shootPosition.getHeading(), secondShootPosition.getHeading())
                 .build();
     }
 
@@ -80,24 +107,39 @@ public class RedPedroAuto extends OpMode {
                 setPathState(PathState.SHOOT); //reset the timer and make a new state
                 break;
             case DRIVE_SHOOT_FIRSTSPIKE:
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.8) {
                     follower.followPath(driveShootFirstSpike, true);
                     setPathState(PathState.DRIVE_FIRSTSPIKE_COLLECT);
                     intake.turnOnIntake(1); //maybe move if it doesn't turn on soon enough
                 }
                 break;
             case DRIVE_FIRSTSPIKE_COLLECT:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-                    follower.setMaxPower(0.4);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    follower.setMaxPower(0.7);
                     follower.followPath(driveFirstSpikeCollect, true);
                     setPathState(PathState.DRIVE_COLLECT_SHOOTPOS);
                 }
                 break;
-            case DRIVE_COLLECT_SHOOTPOS:
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
+            case DRIVE_COLLECT_SECOND_SPIKE:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
                     follower.setMaxPower(0.7);
-                    intake.turnOnIntake(0);
+                    intake.turnOnIntake(1);
+                    follower.followPath(driveCollectSecondSpike, true);
+                    setPathState(PathState.DRIVE_SHOOT_SECOND_SPIKE);
+                }
+                break;
+            case DRIVE_COLLECT_SHOOTPOS:
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 4) {
+                    follower.setMaxPower(0.8);
+                    //intake.turnOnIntake(0);
                     follower.followPath(driveCollectShoot, true);
+                    setPathState(PathState.SHOOT);
+                }
+                break;
+            case DRIVE_SHOOT_SECOND_SPIKE:
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2) {
+                    follower.setMaxPower(0.8);
+                    follower.followPath(driveShootSecondSpike, true);
                     setPathState(PathState.SHOOT);
                 }
                 break;
@@ -105,23 +147,27 @@ public class RedPedroAuto extends OpMode {
                 //check is the follower done
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
                     shootCount++;
-                    outtake.turnOnOuttake(-1740);
-                    if (shootCount == 2) {
-                        setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
-                    } else {
+                    outtake.turnOnOuttake(1740);
+                    if (shootCount == 1) {
                         setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
+                    } else if (shootCount == 2) {
+                        setPathState(PathState.DRIVE_SECONDSPIKE);
+                    } else if (shootCount == 3) {
+                        setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                     }
+                    //outtake.turnOnOuttake(1720);
+                    telemetry.addData("heading", follower.getHeading());
+
                     //TODO add logic for flywheel shooter
-                    sleep(4000);//4500
+                    sleep(1500);//4500
                     delivery.turnOnDelivery(-1);
-                    sleep(2500);//3000
                     intake.turnOnIntake(1);
-                    sleep(3000);
+                    sleep(5000);//3000
                     telemetry.addLine("Done Path 1");
 
                     delivery.turnOnDelivery(0);
                     intake.turnOnIntake(0);
-                    outtake.turnOnOuttake(0);
+                    outtake.turnOffOuttake();
 
                 }
                 break;
@@ -130,9 +176,15 @@ public class RedPedroAuto extends OpMode {
                     follower.followPath(driveShootPosEndPos, true);
                     setPathState(PathState.DONE);
                     delivery.turnOnDelivery(0);
-                    outtake.turnOnOuttake(0);
+                    outtake.turnOffOuttake();
                     intake.turnOnIntake(0);
 
+                }
+                break;
+            case DRIVE_SECONDSPIKE:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveSecondSpikeCollect, true);
+                    setPathState(PathState.DRIVE_COLLECT_SECOND_SPIKE);
                 }
                 break;
             case DONE:
@@ -155,7 +207,7 @@ public class RedPedroAuto extends OpMode {
 
         follower.setPose(startPos);
 
-        outtake = new Outtake(this);
+        outtake = new PIDOuttake(this);
         intake = new Intake24349(this);
         delivery = new Delivery(this);
 
