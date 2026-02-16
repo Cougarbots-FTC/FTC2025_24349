@@ -42,16 +42,17 @@ public class BluePedroAuto extends OpMode {
     PathState pathState;
 
     private final Pose startPos = new Pose(56, 8.4, Math.toRadians(90));
-    private final Pose shootPosition = new Pose(59,12, Math.toRadians(114));//change y val?? math.toRad is robot heading
-    private final Pose secondShootPos = new Pose(59,14.5, Math.toRadians(64));//NEW FROM BLUE AUTO
+    private final Pose shootPosition = new Pose(59,12, Math.toRadians(115));//change y val?? math.toRad is robot heading
+    private final Pose secondShootPos = new Pose(59,12.8, Math.toRadians(114));//NEW FROM BLUE AUTO
     private final Pose firstSpike = new Pose(55, 31, Math.toRadians(0));
+    private final Pose secondSpike = new Pose(45, 59, Math.toRadians(0)); //new Pose(96, 38.3, Math.toRadians(90)); NEW
     private final Pose collectFirstSpike = new Pose(10, 31);
 
-    //private final Pose collectSecondSpike = new Pose(129, 59); //new Pose(131, 38.3); FROM BLUE AUTO
+    private final Pose collectSecondSpike = new Pose(15, 57); //new Pose(131, 38.3); FROM BLUE AUTO
     private final Pose endPose = new Pose(53.5, 27.7, Math.toRadians(114));
 
     private PathChain driveStartPosShootPos, driveShootPosEndPos,
-            driveShootFirstSpike, driveFirstSpikeCollect, driveSecondSpikeCollect,driveCollectSecondSpike,
+            driveShootFirstSpike, driveFirstSpikeCollect, driveSecondSpikeCollect, driveCollectSecondSpike,
             driveShootSecondSpike, driveCollectShoot; //same names as blue..dont wanna change
 
     public void buildPath() {
@@ -65,19 +66,40 @@ public class BluePedroAuto extends OpMode {
                 .build();
 
         driveShootFirstSpike = follower.pathBuilder()
-                .addPath(new BezierLine(shootPosition, firstSpike))
+                .addPath(new BezierCurve(shootPosition, firstSpike))
                 .setLinearHeadingInterpolation(shootPosition.getHeading(), firstSpike.getHeading())
                 .build();
 
+        //TODO added a reversed to hopefully cut down time and to analyze blue auto the same as red
         driveFirstSpikeCollect = follower.pathBuilder()
                 .addPath(new BezierLine(firstSpike, collectFirstSpike))
-                .setLinearHeadingInterpolation(firstSpike.getHeading(), collectFirstSpike.getHeading())
+                .setTangentHeadingInterpolation()
+                .setReversed() //this!
                 .build();
 
         driveCollectShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(collectFirstSpike, secondShootPos))
-                .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), secondShootPos.getHeading())
+                .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), secondShootPos.getHeading()) //maybe change to endPos???
                 .build();
+
+
+        driveSecondSpikeCollect = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPosition, secondSpike))
+                .setLinearHeadingInterpolation(shootPosition.getHeading(), secondSpike.getHeading())
+                .setReversed() //this for path
+                .build();
+
+        driveCollectSecondSpike = follower.pathBuilder()
+                .addPath(new BezierCurve(secondSpike, collectSecondSpike))
+                .setTangentHeadingInterpolation()
+                .setReversed() //this for path
+
+                .build();
+        driveShootSecondSpike = follower.pathBuilder()
+                .addPath(new BezierCurve(collectSecondSpike, secondShootPos))
+                .setLinearHeadingInterpolation(shootPosition.getHeading(), secondShootPos.getHeading())
+                .build();
+
     }
 
     public void startPathUpdate() {
@@ -87,59 +109,61 @@ public class BluePedroAuto extends OpMode {
                 setPathState(PathState.SHOOT); //reset the timer and make a new state
                 break;
             case DRIVE_SHOOT_FIRSTSPIKE: //shoot
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.8) {
                     follower.followPath(driveShootFirstSpike, true);
                     setPathState(PathState.DRIVE_FIRSTSPIKE_COLLECT);
                     intake.turnOnIntake(1); //maybe move if it doesn't turn on soon enough
                 }
                 break;
             case DRIVE_FIRSTSPIKE_COLLECT: //from start position to line up with the first spike
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.setMaxPower(0.4);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    follower.setMaxPower(0.7);
                     follower.followPath(driveFirstSpikeCollect, true);
                     setPathState(PathState.DRIVE_COLLECT_SHOOTPOS);
                 }
-                /*FROM RED!!!
-                case DRIVE_COLLECT_SECOND_SPIKE:
+                break;
+            case DRIVE_COLLECT_SECOND_SPIKE:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
                     follower.setMaxPower(0.7);
                     intake.turnOnIntake(1);
                     follower.followPath(driveCollectSecondSpike, true);
                     setPathState(PathState.DRIVE_SHOOT_SECOND_SPIKE);
-                 */
+                }
                 break;
             case DRIVE_COLLECT_SHOOTPOS://drive, after collecting the first spike, to the shoot position
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
-                    follower.setMaxPower(1);
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 4) {
+                    follower.setMaxPower(0.8);
                     intake.turnOnIntake(0);
                     follower.followPath(driveCollectShoot, true);
                     setPathState(PathState.SHOOT);
                 }
-                /* FROM RED
-                case DRIVE_SHOOT_SECOND_SPIKE:
+                break;
+            case DRIVE_SECONDSPIKE:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveSecondSpikeCollect, true);
+                    setPathState(PathState.DRIVE_COLLECT_SECOND_SPIKE);
+                }
+                break;
+            case DRIVE_SHOOT_SECOND_SPIKE:
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.setMaxPower(0.8);
                     follower.followPath(driveShootSecondSpike, true);
                     setPathState(PathState.SHOOT);
                 }
-                 */
+
                 break;
             case SHOOT:
                 //check is the follower done
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3) {
                     shootCount++;
                     outtake.turnOnOuttake(1740);
-                    if (shootCount == 2) {
-                        setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
-                    } else {
+                    if (shootCount == 1) {
                         setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
-                    }
-                    /*RED
-                    else if (shootCount == 3) {
+                    } else {//if (shootCount == 2) {
+                        //setPathState(PathState.DRIVE_SECONDSPIKE);
+                   // } else if (shootCount == 3) {
                         setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                     }
-                     */
-                    outtake.turnOnOuttake(1740);
                     telemetry.addData("heading", follower.getHeading());
 
                     //TODO add logic for flywheel shooter
@@ -166,6 +190,7 @@ public class BluePedroAuto extends OpMode {
 
                 }
                 break;
+
             case DONE:
                 if (!follower.isBusy()) {
                     telemetry.addLine("All paths done");

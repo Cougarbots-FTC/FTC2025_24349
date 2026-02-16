@@ -43,8 +43,8 @@ public class RedPedroAuto extends OpMode {
     PathState pathState;
 
     private final Pose startPos = new Pose(83.6, 9.4, Math.toRadians(90));
-    private final Pose shootPosition = new Pose(86.8,14.5, Math.toRadians(65));//robot heading
-    private final Pose secondShootPosition = new Pose(86.9,14.65, Math.toRadians(64));//NEW
+    private final Pose shootPosition = new Pose(86.66,13.5, Math.toRadians(65));//robot heading
+    private final Pose secondShootPosition = new Pose(86.9,14.35, Math.toRadians(65));//NEW
 
     private final Pose firstSpike = new Pose(96.090, 36.5, Math.toRadians(180)); //new Pose(96, 38.3, Math.toRadians(90));
     private final Pose secondSpike = new Pose(96.090, 59, Math.toRadians(180)); //new Pose(96, 38.3, Math.toRadians(90)); NEW
@@ -81,7 +81,6 @@ public class RedPedroAuto extends OpMode {
                 .addPath(new BezierCurve(collectFirstSpike, secondShootPosition)) //add second
                 .setLinearHeadingInterpolation(collectFirstSpike.getHeading(), endPose.getHeading())
                 .build();
-
 
         //SECOND SPIKE
         driveSecondSpikeCollect = follower.pathBuilder()
@@ -151,8 +150,8 @@ public class RedPedroAuto extends OpMode {
                     if (shootCount == 1) {
                         setPathState(PathState.DRIVE_SHOOT_FIRSTSPIKE);
                     } else if (shootCount == 2) {
-                        setPathState(PathState.DRIVE_SECONDSPIKE);
-                    } else if (shootCount == 3) {
+                        //setPathState(PathState.DRIVE_SECONDSPIKE);
+                   // } else if (shootCount == 3) {
                         setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                     }
                     //outtake.turnOnOuttake(1720);
