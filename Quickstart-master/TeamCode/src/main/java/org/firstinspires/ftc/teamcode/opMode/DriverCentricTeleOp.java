@@ -37,7 +37,9 @@ public class DriverCentricTeleOp extends OpMode {
         intake.teleOp();
         outtake.teleOp();
         holder.teleOp();
-        intakeServo.addTelemetry(this);
         intakeServo.teleOp();
+
+        outtake.addTelemetry(this);
+
     }
 }
