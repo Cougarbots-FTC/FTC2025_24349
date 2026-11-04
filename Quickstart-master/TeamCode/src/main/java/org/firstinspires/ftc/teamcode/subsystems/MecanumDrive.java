@@ -21,6 +21,12 @@ public class MecanumDrive {
 
     private double speed = 1;
 
+    /*
+    Demonstrate how to write/program a mecanum drive class...
+    make the works (package, imports, the giant MecanumDrive class and its variables,
+    public mecanumDrive(opMode mode), setAllMotors, and telemetry
+     */
+
     public MecanumDrive(OpMode mode) {
         driver1 = mode.gamepad1;
         driver2 = mode.gamepad2;
